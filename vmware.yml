@@ -1,0 +1,44 @@
+---
+- hosts: localhost
+  connection: local
+
+  vars_prompt: 
+  - name: username
+    prompt: "Enter VMWare Vcenter Username " 
+    private: no
+  - name: password
+    prompt: "Enter VMWare Vcenter Password " 
+    private: yes
+
+  tasks: 
+  - name: Creating VM From Template
+    vmware_guest: 
+       hostname: 10.0.50.72
+       username: '{{ username }}'
+       password: '{{ password }}'
+       datacenter: Datacenter01
+       name: test-vm
+       template: Rhel-7.3-FixTemplate
+       networks: 
+       - name: VM Network
+         device_type: e1000
+         type: static
+         ip: 10.0.50.39
+         netmask: 255.255.255.0
+         gateway: 10.0.50.1
+       disk: 
+       - size_gb: 20
+         type: thin
+         datastore: SMALL
+       hardware: 
+         memory_mb: 1024
+         num_cpus: 1
+         scsi: lsilogic
+       customization:
+         hostname: bajauvm
+         dns_servers: 
+         - 10.0.50.1
+         - 8.8.8.8
+         - 8.8.4.4
+    delegate_to: localhost
+    register: deploy
